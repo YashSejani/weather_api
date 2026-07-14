@@ -1,0 +1,22 @@
+.env
+
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+bin/
+dist/
+weather-api   # Replace this with your compiled binary name if you build it
+
+vendor/
+
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

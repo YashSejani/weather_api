@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"fmt"
 	"net/http"
 	"github.com/joho/godotenv"
@@ -21,5 +22,10 @@ func main() {
 	
 	mux.HandleFunc("/weather", handleWeather)
 
-	http.ListenAndServe(":8080", mux)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	fmt.Printf("Server successfully running on port :%s\n", port)
+	http.ListenAndServe(":"+port, mux)
 }

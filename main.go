@@ -5,9 +5,18 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"time"
+
 	// "io"
+	"context"
+
 	"github.com/joho/godotenv"
+	"github.com/redis/go-redis/v9"
 )
+
+var rdb *redis.Client
+
+var ctx = context.Background()
 
 type WeatherData struct {
 	City        string `json:"city"`
@@ -31,9 +40,19 @@ func weather(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	cachedData, err := rdb.Get(ctx, city).Result()
+
+	if err == nil {
+		w.Header().Set("Content-Type", "application/json")
+
+		w.Write([]byte(cachedData))
+		return
+	}
+
 	apiURL := fmt.Sprintf("https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/%s/today?unitGroup=metric&key=%s", city, os.Getenv("WEATHER_API_KEY"))
 
 	resp, err := http.Get(apiURL)
+
 	if err != nil {
 		http.Error(w, "Failed to fetch weather data", http.StatusInternalServerError)
 		return
@@ -46,6 +65,7 @@ func weather(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var externalData ExternalWeatherResponse
+
 	err = json.NewDecoder(resp.Body).Decode(&externalData)
 	if err != nil {
 		http.Error(w, "Failed to parse weather data data", http.StatusInternalServerError)
@@ -56,6 +76,12 @@ func weather(w http.ResponseWriter, r *http.Request) {
 		City:        externalData.ResolvedAddress,
 		Temperature: fmt.Sprintf("%.1f°C", externalData.CurrentConditions.Temp),
 		Condition:   externalData.CurrentConditions.Conditions,
+	}
+
+	cacheBytes, err := json.Marshal(cleanWeatherData)
+
+	if err == nil {
+		rdb.Set(ctx, city, cacheBytes, 10 * time.Minute)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -77,6 +103,12 @@ func weather(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	rdb = redis.NewClient(&redis.Options{
+		Addr: "localhost:6379",
+		Password: "",
+		DB: 0,
+	})
+
 	err := godotenv.Load()
     if err != nil {
         fmt.Println("Warning: No .env file found, relying on system env")

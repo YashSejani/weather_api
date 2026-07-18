@@ -121,3 +121,11 @@ GET http://localhost:8080/weather?city=keshod
   "icon": "partly-cloudy-day"
 }
 ```
+
+---
+
+## Project Reference
+
+This project is a complete solution for the **[Weather API Wrapper Service](https://roadmap.sh/projects/weather-api-wrapper-service)** project from **[roadmap.sh](https://roadmap.sh/)**.
+
+---

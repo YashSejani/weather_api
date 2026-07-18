@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Weather Dashboard</title>
+    <style>
+        body { font-family: sans-serif; max-width: 400px; margin: 50px auto; text-align: center; }
+        input, button { padding: 10px; font-size: 16px; margin: 5px; }
+        #result { margin-top: 20px; padding: 15px; border: 1px solid #ccc; border-radius: 5px; display: none; }
+    </style>
+</head>
+<body>
+    <h2>Weather Dashboard</h2>
+    <input type="text" id="cityInput" placeholder="Enter city name...">
+    <button onclick="getWeather()">Search</button>
+
+    <div id="result">
+        <h3 id="cityName"></h3>
+        <p><strong>Temperature:</strong> <span id="temp"></span></p>
+        <p><strong>Condition:</strong> <span id="cond"></span></p>
+        <p><strong>Humidity:</strong> <span id="humidity"></span></p>
+        <p><strong>Wind Speed:</strong> <span id="wind"></span></p>
+        <p><strong>Sunrise:</strong> <span id="sunrise"></span> | <strong>Sunset:</strong> <span id="sunset"></span></p>
+    </div>
+
+    <script>
+        async function getWeather() {
+            const city = document.getElementById('cityInput').value;
+            if (!city) return alert("Please enter a city name");
+
+            try {
+                // Call your local Go API endpoint dynamically!
+                const response = await fetch(`/weather?city=${city}`);
+                if (!response.ok) throw new Error("City not found or server error");
+                
+                const data = await response.json();
+                
+                // Put the JSON data straight onto the screen
+                document.getElementById('cityName').innerText = data.city;
+                document.getElementById('temp').innerText = data.temperature;
+                document.getElementById('cond').innerText = data.condition;
+                document.getElementById('humidity').innerText = data.humidity;
+                document.getElementById('wind').innerText = data.windSpeed;
+                document.getElementById('sunrise').innerText = data.sunrise;
+                document.getElementById('sunset').innerText = data.sunset;
+                document.getElementById('result').style.display = 'block';
+            } catch (err) {
+                alert(err.message);
+            }
+        }
+    </script>
+</body>
+</html>
